@@ -105,6 +105,14 @@ resource "aws_security_group" "web_sg" {
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
+    
+    egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
 }
 
 resource "aws_security_group" "rds_sg" {
@@ -143,7 +151,6 @@ resource "aws_route_table_association" "public2_assoc" {
 }
 
 
-
 # EC2 instances
 resource "aws_instance" "instance1" {
     ami                         = "ami-051f8a213df8bc089"
@@ -151,6 +158,7 @@ resource "aws_instance" "instance1" {
     subnet_id                   = aws_subnet.public1.id
     vpc_security_group_ids      = [aws_security_group.web_sg.id]
     associate_public_ip_address = true
+    depends_on = [aws_internet_gateway.terraform_igw]
     
     user_data = <<-EOF
         #!/bin/bash
@@ -172,6 +180,7 @@ resource "aws_instance" "instance2" {
     subnet_id                   = aws_subnet.public2.id
     vpc_security_group_ids      = [aws_security_group.web_sg.id]
     associate_public_ip_address = true
+    depends_on = [aws_internet_gateway.terraform_igw]
     
     user_data = <<-EOF
         #!/bin/bash
